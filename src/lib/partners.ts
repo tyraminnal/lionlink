@@ -15,16 +15,20 @@ export type UserProfile = {
   major?: string;
   year?: string;
   courses?: string[];
+  goals?: string[];
+  availability?: string[];
   studyStyleTags?: string[];
 };
 
 function normalizeProfile(id: string, data: DocumentData): UserProfile {
   return {
     uid: id,
-    displayName: data.displayName ?? "Student",
+    displayName: data.name ?? data.displayName ?? "Student",
     major: data.major ?? "",
     year: data.year ?? "",
     courses: Array.isArray(data.courses) ? data.courses : [],
+    goals: Array.isArray(data.goals) ? data.goals : [],
+    availability: Array.isArray(data.availability) ? data.availability : [],
     studyStyleTags: Array.isArray(data.studyStyleTags) ? data.studyStyleTags : [],
   };
 }

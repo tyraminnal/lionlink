@@ -44,9 +44,9 @@ export default function ProfileScreen() {
         setName(p?.name ?? "");
         setMajor(p?.major ?? "");
         setYear(p?.year ?? "");
-        setCoursesCsv((p?.enrolledCourses ?? []).join(", "));
-        setStudyStyleCsv((p?.studyStyle ?? []).join(", "));
-        setModeCsv((p?.mode ?? []).join(", "));
+        setCoursesCsv((p?.courses ?? []).join(", "));
+        setStudyStyleCsv((p?.goals ?? []).join(", "));
+        setModeCsv((p?.availability ?? []).join(", "));
       } catch (e: any) {
         setErrMsg(e?.message ?? "Failed to load profile.");
       } finally {
@@ -67,9 +67,9 @@ export default function ProfileScreen() {
         name: name.trim(),
         major: major.trim(),
         year: year.trim(),
-        enrolledCourses: csvToList(coursesCsv),
-        studyStyle: csvToList(studyStyleCsv),
-        mode: csvToList(modeCsv),
+        courses: csvToList(coursesCsv),
+        goals: csvToList(studyStyleCsv),
+        availability: csvToList(modeCsv),
       };
 
       //await updateMyProfile(uid, updates);
