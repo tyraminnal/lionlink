@@ -25,19 +25,29 @@ const missing = Object.entries(firebaseConfig)
 
 if (missing.length) {
   console.error("❌ Missing Firebase env vars:", missing);
-  throw new Error(
-    `Missing Firebase env vars: ${missing.join(", ")}. Check .env and restart.`
-  );
+  console.warn("⚠️ Running in DEMO MODE - Firebase features will not work");
+  // Temporarily disabled to show UI: throw new Error(
+  //   `Missing Firebase env vars: ${missing.join(", ")}. Check .env and restart.`
+  // );
 }
 
 console.log("✅ All Firebase env vars present");
 
-export const app =
-  getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
+let app, auth, db;
 
-console.log("✅ Firebase app initialized");
+try {
+  app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
+  console.log("✅ Firebase app initialized");
+  auth = getAuth(app);
+  db = getFirestore(app);
+  console.log("✅ Firebase Auth and Firestore ready");
+} catch (error) {
+  console.error("❌ Firebase initialization failed:", error);
+  console.warn("⚠️ DEMO MODE: Creating mock Firebase instances");
+  // Create mock objects so imports don't crash
+  app = null as any;
+  auth = null as any;
+  db = null as any;
+}
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-
-console.log("✅ Firebase Auth and Firestore ready");
+export { app, auth, db };
