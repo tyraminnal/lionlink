@@ -1,41 +1,28 @@
 import { useState } from "react";
 import type { FC, FormEvent } from "react";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, X } from "lucide-react";
 import {
   loginWithEmail,
   loginWithUni,
   signUpWithEmail,
-  resetPassword, // ✅ add this
+  resetPassword,
 } from "../lib/auth";
 
 type LoginScreenProps = {
   onNavigate: (screen: string) => void;
 };
 
-type Mode = "none" | "uni" | "login" | "signup";
+type Mode = "welcome" | "signup" | "login";
 
 const LoginScreen: FC<LoginScreenProps> = ({ onNavigate }) => {
-  const [mode, setMode] = useState<Mode>("none");
+  const [mode, setMode] = useState<Mode>("welcome");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [uni, setUni] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const handleUniSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      await loginWithUni(uni.trim(), password);
-      // App.tsx handles navigation on auth state change
-    } catch (err: any) {
-      setError(err?.message ?? "UNI login failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -63,178 +50,209 @@ const LoginScreen: FC<LoginScreenProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleResetPassword = async () => {
-    setError(null);
-
-    if (!email.trim()) {
-      setError("Enter your email first.");
-      return;
-    }
-
-    try {
-      await resetPassword(email.trim());
-      setError("Password reset email sent 📬 Check your inbox.");
-    } catch (e: any) {
-      setError(e?.message ?? "Could not send reset email.");
-    }
+  const handleUniLogin = async () => {
+    // Placeholder for UNI login - can be implemented later
+    alert("UNI login coming soon!");
   };
 
-  return (
-    <div className="h-full w-full max-w-md mx-auto flex flex-col bg-white">
-      {/* Blue hero header */}
-      <div className="bg-gradient-to-b from-blue-600 to-blue-500 px-8 pt-10 pb-9 text-center text-white shadow-md">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 border border-white/30">
-          <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-blue-600">
-            <GraduationCap className="w-6 h-6" />
+  // Welcome Screen
+  if (mode === "welcome") {
+    return (
+      <div className="h-full w-full flex flex-col items-center justify-center bg-white px-8">
+        {/* Logo placeholder */}
+        <div className="mb-8 flex h-32 w-32 items-center justify-center rounded-2xl bg-gray-200">
+          <div className="h-20 w-20 rounded-xl bg-blue-600 flex items-center justify-center text-white">
+            <GraduationCap className="w-12 h-12" />
           </div>
         </div>
 
-        <h1 className="text-2xl font-semibold tracking-tight">LionLink</h1>
-        <p className="mt-2 text-sm text-blue-100">Link up. Lock in. Level up.</p>
-      </div>
+        {/* Title */}
+        <div className="text-center mb-12">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign U</h1>
+          <p className="text-sm text-gray-600">
+            Create an account and<br />join the LionLink community!
+          </p>
+        </div>
 
-      {/* Body */}
-      <div className="flex-1 px-8 pt-8 pb-8 flex flex-col">
-        {/* Main quick actions */}
-        <div className="space-y-4">
+        {/* Buttons */}
+        <div className="w-full max-w-xs space-y-4">
           <button
             type="button"
-            onClick={() => setMode("uni")}
-            className="w-full inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+            onClick={handleUniLogin}
+            className="w-full inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
           >
             <GraduationCap className="w-4 h-4 mr-2" />
-            <span>Continue with your UNI</span>
+            <span>Continue with UNI</span>
           </button>
 
           <button
             type="button"
             onClick={() => setMode("signup")}
-            className="w-full rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
           >
-            Sign Up with Email
+            Sign Up with Ema
           </button>
-
-          <button
-            type="button"
-            onClick={() => setMode("login")}
-            className="text-sm font-medium text-blue-600 hover:underline"
-          >
-            Already have an account?
-          </button>
-        </div>
-
-        {/* Error message */}
-        {error && <p className="mt-4 text-xs text-red-600 text-center">{error}</p>}
-
-        {/* Forms */}
-        <div className="mt-6 space-y-4">
-          {/* UNI login */}
-          {mode === "uni" && (
-            <form onSubmit={handleUniSubmit} className="space-y-3">
-              <p className="text-xs text-gray-500">
-                Use your university UNI. We&apos;ll treat it as{" "}
-                <span className="font-mono">@columbia.edu</span> behind the scenes.
-              </p>
-
-              <input
-                value={uni}
-                onChange={(e) => setUni(e.target.value)}
-                placeholder="Your UNI (e.g. ab1234)"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-              />
-
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                type="password"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-              />
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-full bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-              >
-                {loading ? "Signing in..." : "Continue"}
-              </button>
-            </form>
-          )}
-
-          {/* Email login */}
-          {mode === "login" && (
-            <form onSubmit={handleEmailLogin} className="space-y-3">
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                type="email"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-              />
-
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                type="password"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-              />
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-full bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-              >
-                {loading ? "Logging in..." : "Log In"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleResetPassword}
-                className="mt-1 text-xs text-blue-600 hover:underline text-left"
-              >
-                Forgot password?
-              </button>
-            </form>
-          )}
-
-          {/* Email signup */}
-          {mode === "signup" && (
-            <form onSubmit={handleEmailSignup} className="space-y-3">
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                type="email"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-              />
-
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                type="password"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-              />
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-full bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-              >
-                {loading ? "Creating account..." : "Create Account"}
-              </button>
-            </form>
-          )}
         </div>
 
         {/* Terms footer */}
-        <p className="mt-auto pt-6 text-[11px] text-gray-400 text-center leading-snug">
-          By signing up, you agree with our{" "}
+        <p className="mt-8 text-xs text-gray-400 text-center max-w-xs">
+          By signing up, you agree with the{" "}
           <button className="text-blue-600 hover:underline">Terms of Service</button>{" "}
           and{" "}
           <button className="text-blue-600 hover:underline">Privacy Policy</button>.
         </p>
+      </div>
+    );
+  }
+
+  // Create Account Screen
+  if (mode === "signup") {
+    return (
+      <div className="h-full w-full bg-white">
+        {/* Header */}
+        <div className="px-4 pt-4">
+          <button
+            type="button"
+            onClick={() => setMode("welcome")}
+            className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+          >
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="px-8 pt-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Create An Accou</h2>
+
+          <form onSubmit={handleEmailSignup} className="space-y-4">
+            <input
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="First Name"
+              className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+            />
+
+            <input
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Last Name"
+              className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+            />
+
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              type="email"
+              className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+            />
+
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              type="password"
+              className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-lg bg-rose-400 px-4 py-3 text-sm font-medium text-white hover:bg-rose-500 disabled:opacity-60 transition-colors"
+            >
+              {loading ? "Creating account..." : "Sign Up"}
+            </button>
+
+            {error && <p className="text-xs text-red-600 text-center">{error}</p>}
+          </form>
+
+          <p className="mt-6 text-xs text-gray-400 text-center">
+            By signing up, you agree with the{" "}
+            <button className="text-blue-600 hover:underline">Terms of Service</button>{" "}
+            and{" "}
+            <button className="text-blue-600 hover:underline">Privacy Policy</button>.
+          </p>
+
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              onClick={() => setMode("login")}
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-50"
+            >
+              Already have an account?
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Sign In Screen
+  return (
+    <div className="h-full w-full bg-white">
+      {/* Header */}
+      <div className="px-4 pt-4">
+        <button
+          type="button"
+          onClick={() => setMode("welcome")}
+          className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+        >
+          <X className="w-5 h-5 text-gray-600" />
+        </button>
+      </div>
+
+      {/* Form */}
+      <div className="px-8 pt-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Sign In With Ema</h2>
+
+        <form onSubmit={handleEmailLogin} className="space-y-4">
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            type="email"
+            className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+          />
+
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            type="password"
+            className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-rose-400 px-4 py-3 text-sm font-medium text-white hover:bg-rose-500 disabled:opacity-60 transition-colors"
+          >
+            {loading ? "Signing in..." : "Sign In"}
+          </button>
+
+          {error && <p className="text-xs text-red-600 text-center">{error}</p>}
+        </form>
+
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={() => setMode("signup")}
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-50"
+          >
+            Need an account?
+          </button>
+        </div>
+
+        <div className="mt-8 text-center">
+          <button
+            type="button"
+            onClick={handleUniLogin}
+            className="w-full inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            <GraduationCap className="w-4 h-4 mr-2" />
+            <span>Continue with UNI</span>
+          </button>
+        </div>
       </div>
     </div>
   );
